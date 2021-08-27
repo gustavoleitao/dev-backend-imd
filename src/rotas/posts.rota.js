@@ -17,7 +17,9 @@ aws.config.update({
     region: 'us-east-1'
 });
 
-var s3 = multer({
+s3 = new aws.S3();
+
+const s3Storage = multer({
     storage: multerS3({
         s3: s3,
         bucket: process.env.S3_BUCKET_NAME,
@@ -27,7 +29,7 @@ var s3 = multer({
     })
 });
 
-var disk = multer.diskStorage({
+const diskStorage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'public/uploads')
     },
@@ -36,7 +38,7 @@ var disk = multer.diskStorage({
     }
 })
 
-const storage = isS3 ? s3 : disk
+const storage = isS3 ? s3Storage : diskStorage
 
 const fileFilter = (req, file, cb) => {
     const extensoes = /jpeg|jpg/i
