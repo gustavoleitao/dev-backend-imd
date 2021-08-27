@@ -3,10 +3,11 @@ const router = express.Router()
 const postMid = require('../middleware/validarPost.middleware')
 const { Post, Usuario } = require('../db/models')
 var multer  = require('multer')
+const multerS3 = require('multer-s3')
+const aws = require('aws-sdk')
 const path = require('path')
 const ErrorHandler = require('../utils/ErrorHandler')
 const autenticar = require('../middleware/autenticacao.mid')
-
 
 const isS3 = process.env.STORAGE === 's3'
 
