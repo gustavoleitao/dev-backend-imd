@@ -7,7 +7,26 @@ const path = require('path')
 const ErrorHandler = require('../utils/ErrorHandler')
 const autenticar = require('../middleware/autenticacao.mid')
 
-var storage = multer.diskStorage({
+
+const isS3 = process.env.STORAGE === 's3'
+
+aws.config.update({
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    region: 'us-east-1'
+});
+
+var s3 = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.S3_BUCKET_NAME,
+        key: function (req, file, cb) {
+            cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
+        }
+    })
+});
+
+var disk = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'public/uploads')
     },
@@ -15,6 +34,8 @@ var storage = multer.diskStorage({
        cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname)) 
     }
 })
+
+const storage = isS3 ? s3 : disk
 
 const fileFilter = (req, file, cb) => {
     const extensoes = /jpeg|jpg/i
@@ -49,7 +70,7 @@ router.post('/:id/upload', upload.single('foto'), async (req, res) => {
     const id = req.params.id
     const post = await Post.findByPk(id)
     if (post){
-        post.foto = `/static/uploads/${req.file.filename}`
+        post.foto = getFullpathFilename(req.file.filename)
         await post.save()
         res.json({msg: "Upload realizado com sucesso!"})
     }else{
@@ -60,7 +81,7 @@ router.post('/:id/upload', upload.single('foto'), async (req, res) => {
 router.post('/', async (req, res, next) => {
     const data = req.body
     if (req.file){
-        data.foto = `/static/uploads/${req.file.filename}`
+        data.foto = getFullpathFilename(req.file.filename)
     }
     try{
         const post = await Post.create(data)
@@ -96,6 +117,10 @@ router.put('/', async (req, res) => {
         res.status(400).json({msg: "Post não encontrado!"})
     }
 })
+
+function getFullpathFilename(filename) {
+    return isS3 ? `${process.env.S3_BUCKET_NAME}/${filename}` : `/static/uploads/${filename}`
+}
 
 function prepararResultado(post){
     const result = Object.assign({}, post)
