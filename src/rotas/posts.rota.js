@@ -85,6 +85,8 @@ router.post('/:id/upload', upload.single('foto'), async (req, res) => {
 router.post('/', async (req, res, next) => {
     const data = req.body
     if (req.file){
+        console.log('FILE!')
+        console.log(req.file)
         data.foto = getFullpathFilename(req.file.filename)
     }
     try{
