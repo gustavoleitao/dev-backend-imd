@@ -9,13 +9,12 @@ const swaggerUi = require('swagger-ui-express')
 const YAML = require('yamljs')
 const helmet = require('helmet')
 
-
 const swaggerDocument = YAML.load('./api.yaml')
 
 require('dotenv').config()
 const app = express()
 
-app.use(helmet())
+// app.use(helmet())
 
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
