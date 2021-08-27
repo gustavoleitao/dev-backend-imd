@@ -19,15 +19,13 @@ aws.config.update({
 
 const s3 = new aws.S3()
 
-const s3Storage = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: process.env.S3_BUCKET_NAME,
-        key: function (req, file, cb) {
-            cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
-        }
-    })
-});
+const s3Storage = multerS3({
+    s3: s3,
+    bucket: process.env.S3_BUCKET_NAME,
+    key: function (req, file, cb) {
+        cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
+    }
+})
 
 const diskStorage = multer.diskStorage({
     destination: function (req, file, cb) {
