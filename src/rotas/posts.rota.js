@@ -24,7 +24,10 @@ const s3Storage = multerS3({
     bucket: process.env.S3_BUCKET_NAME,
     key: function (req, file, cb) {
         cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
-    }
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname)) 
+     }
 })
 
 const diskStorage = multer.diskStorage({
@@ -118,9 +121,12 @@ router.put('/', async (req, res) => {
         res.status(400).json({msg: "Post não encontrado!"})
     }
 })
-
 function getFullpathFilename(filename) {
-    return isS3 ? `${process.env.S3_BUCKET_NAME}/${filename}` : `/static/uploads/${filename}`
+    if (isS3){
+        return `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${filename}`
+    }else{
+        return `${URL_PATH}/static/uploads/${filename}`
+    }
 }
 
 function prepararResultado(post){
