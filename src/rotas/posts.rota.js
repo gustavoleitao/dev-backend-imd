@@ -74,7 +74,7 @@ router.post('/:id/upload', upload.single('foto'), async (req, res) => {
     const id = req.params.id
     const post = await Post.findByPk(id)
     if (post){
-        post.foto = getFullpathFilename(req.file.filename)
+        post.foto = getFullpathFilename(req.file)
         await post.save()
         res.json({msg: "Upload realizado com sucesso!"})
     }else{
@@ -85,9 +85,7 @@ router.post('/:id/upload', upload.single('foto'), async (req, res) => {
 router.post('/', async (req, res, next) => {
     const data = req.body
     if (req.file){
-        console.log('FILE!')
-        console.log(req.file)
-        data.foto = getFullpathFilename(req.file.filename)
+        data.foto = getFullpathFilename(req.file)
     }
     try{
         const post = await Post.create(data)
@@ -125,9 +123,9 @@ router.put('/', async (req, res) => {
 })
 function getFullpathFilename(filename) {
     if (isS3){
-        return `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${filename}`
+        return filename.location
     }else{
-        return `${URL_PATH}/static/uploads/${filename}`
+        return `${URL_PATH}/static/uploads/${filename.filename}`
     }
 }
 
