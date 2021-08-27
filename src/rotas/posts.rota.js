@@ -17,14 +17,14 @@ aws.config.update({
     region: 'us-east-1'
 });
 
-s3 = new aws.S3();
+const s3 = new aws.S3()
 
 const s3Storage = multer({
     storage: multerS3({
         s3: s3,
         bucket: process.env.S3_BUCKET_NAME,
         key: function (req, file, cb) {
-            cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
+            cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
         }
     })
 });
